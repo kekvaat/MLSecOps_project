@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+
+  airflow-init:
+    image: apache/airflow:2.7.0
+    depends_on:
+      - postgres
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__FERNET_KEY=NzZ6cVYxY1phd3dOdFZ4QW5lWXh4dWtkUmYzRDR2MXU=
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=False
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        airflow db init &&         airflow users create           --username admin           --password admin           --firstname Admin           --lastname User           --role Admin           --email admin@example.com
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/data:/opt/airflow/data
+      - ./airflow/models:/opt/airflow/models
+
+  airflow-webserver:
+    image: apache/airflow:2.7.0
+    depends_on:
+      - postgres
+    ports:
+      - "8088:8080"
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG=True
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/data:/opt/airflow/data
+      - ./airflow/models:/opt/airflow/models
+    command: >
+      bash -c "airflow webserver --port 8080 --host 0.0.0.0"
+
+  airflow-scheduler:
+    image: apache/airflow:2.7.0
+    depends_on:
+      - postgres
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/data:/opt/airflow/data
+      - ./airflow/models:/opt/airflow/models
+    command: scheduler
+
+volumes:
+  postgres-db-volume:

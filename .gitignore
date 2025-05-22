@@ -1,0 +1,41 @@
+# Ignore all .env files
+.venv/
+env/
+ENV/
+*.env
+*.log
+mlops-env/
+
+# Ignore all files in node_modules
+node_modules/
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore logs and temporary files
+*.log
+tmp/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Docker cache / image
+*.tar
+
+# Models and outputs
+*.pkl
+*.joblib
+mlruns/
+models/
+
+# IDE files
+.vscode/
+.idea/
+
+# Streamlit cache
+.streamlit/
